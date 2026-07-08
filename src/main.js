@@ -172,7 +172,7 @@ async function doSignup(){
     pendingConfirmEmail = email;
     authScreen = 'confirm';
     renderAuth();
-  }catch(e){ err.textContent = e.message || 'Could not create account.'; }
+  }catch(e){ err.textContent = mapAuthError(e); }
 }
 async function doConfirm(){
   const err = document.getElementById('cf-error');
@@ -180,17 +180,43 @@ async function doConfirm(){
     await confirmSignUp({ username: pendingConfirmEmail, confirmationCode: document.getElementById('cf-code').value.trim() });
     authScreen = 'signin';
     renderAuth();
-  }catch(e){ err.textContent = e.message || 'Could not verify code.'; }
+  }catch(e){ err.textContent = mapAuthError(e); }
 }
+function mapAuthError(e){
+  const name = e && e.name;
+  if(name === 'UserNotFoundException') return 'No account found with that email — check for typos, or create an account.';
+  if(name === 'NotAuthorizedException') return 'Incorrect email or password.';
+  if(name === 'UserNotConfirmedException') return 'This email hasn\u2019t been verified yet — check your inbox for the code.';
+  if(name === 'UsernameExistsException') return 'An account with this email already exists — try signing in instead.';
+  if(name === 'InvalidPasswordException') return 'Password must be at least 8 characters with upper case, lower case, a number, and a symbol.';
+  if(name === 'CodeMismatchException') return 'That code doesn\u2019t match — double check it and try again.';
+  if(name === 'ExpiredCodeException') return 'That code has expired — request a new one.';
+  if(name === 'LimitExceededException' || name === 'TooManyRequestsException') return 'Too many attempts — please wait a minute and try again.';
+  return (e && e.message) || 'Something went wrong — please try again.';
+}
+
 async function doLogin(){
   const err = document.getElementById('lg-error');
+  err.textContent = '';
   try{
     await signIn({
       username: document.getElementById('lg-email').value.trim().toLowerCase(),
       password: document.getElementById('lg-pass').value,
     });
-    await startApp();
-  }catch(e){ err.textContent = e.message || 'Could not sign in.'; }
+  }catch(e){ err.textContent = mapAuthError(e); return; }
+
+  // Right after sign-in, Cognito's session sometimes isn't fully ready for the
+  // data client's very first request yet. Rather than fail and strand the user
+  // on the login screen until they manually reload, retry briefly before giving up.
+  for(let attempt = 0; attempt < 4; attempt++){
+    try{
+      await startApp();
+      return;
+    }catch(e){
+      if(attempt === 3){ err.textContent = 'Signed in, but couldn\u2019t load your data. Please refresh the page.'; return; }
+      await new Promise(r => setTimeout(r, 500));
+    }
+  }
 }
 async function doForgotRequest(){
   const err = document.getElementById('fp-error');
@@ -200,7 +226,7 @@ async function doForgotRequest(){
     forgotEmail = email;
     authScreen = 'forgot-confirm';
     renderAuth();
-  }catch(e){ err.textContent = e.message || 'Could not start password reset.'; }
+  }catch(e){ err.textContent = mapAuthError(e); }
 }
 async function doForgotConfirm(){
   const err = document.getElementById('fp-confirm-error');
@@ -213,9 +239,15 @@ async function doForgotConfirm(){
     forgotEmail = null;
     authScreen = 'signin';
     renderAuth();
-  }catch(e){ err.textContent = e.message || 'Could not reset password.'; }
+  }catch(e){ err.textContent = mapAuthError(e); }
 }
-async function doSignOut(){ await signOut(); currentUser = null; authScreen = 'signin'; renderAuth(); }
+async function doSignOut(){
+  await signOut();
+  currentUser = null;
+  cache = { properties: [], income: [], expenses: [], contacts: [], notes: [], settings: { appName: 'Rent Ledger', currency: 'INR' } };
+  authScreen = 'signin';
+  renderAuth();
+}
 async function doDeleteAccount(){
   try{
     await Promise.all([
