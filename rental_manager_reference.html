@@ -1,0 +1,1111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Rent Ledger</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<style>
+:root{
+  --ink:#1F2A24; --paper:#F1ECDE; --paper-dark:#E3DCC7; --paper-darker:#D6CDB2;
+  --brass:#B8863B; --brass-light:#D9AE6B; --moss:#4C6B54; --moss-light:#EAF0E7;
+  --rust:#A8462F; --rust-light:#F5E4DE; --amber:#B5862A; --amber-light:#F3E8D2; --line:#C9BE9E;
+}
+*{box-sizing:border-box;}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:'Inter',sans-serif;}
+.app{display:flex;min-height:100vh;}
+.mono{font-family:'IBM Plex Mono',monospace;}
+.display{font-family:'Fraunces',serif;}
+.hint{font-size:11.5px;color:#8a8468;margin-top:4px;}
+.link-btn{all:unset;cursor:pointer;color:var(--brass);font-weight:600;font-size:12px;text-decoration:underline;}
+
+.center-screen{min-height:100vh;width:100%;display:flex;align-items:center;justify-content:center;background:var(--ink);padding:20px;}
+.auth-card{background:var(--paper);border-radius:14px;padding:38px 34px;width:100%;max-width:380px;text-align:center;}
+.auth-card .stamp{display:inline-flex;align-items:center;justify-content:center;width:48px;height:48px;border:2px solid var(--brass);border-radius:50%;transform:rotate(-8deg);margin-bottom:14px;}
+.auth-card h2{font-family:'Fraunces',serif;font-size:24px;margin:0 0 6px 0;}
+.auth-card p{font-size:13px;color:#6b6350;margin:0 0 22px 0;}
+.auth-card .field{text-align:left;}
+.auth-card .btn{width:100%;margin-top:6px;padding:12px;}
+.auth-note{font-size:11px;color:#a09a80;margin-top:16px;line-height:1.5;}
+.profile-list{display:flex;flex-direction:column;gap:8px;margin-bottom:16px;}
+.profile-row{all:unset;cursor:pointer;display:flex;align-items:center;gap:10px;padding:12px 14px;background:#fff;border:1.5px solid var(--line);border-radius:8px;text-align:left;}
+.profile-row:hover{border-color:var(--brass);}
+.profile-row .av{width:32px;height:32px;border-radius:50%;background:var(--ink);color:var(--paper);display:flex;align-items:center;justify-content:center;font-family:'Fraunces',serif;font-weight:600;flex-shrink:0;}
+.reset-box{margin-top:14px;padding:12px;background:var(--rust-light);border-radius:8px;text-align:left;}
+.reset-box .msg{font-size:12.5px;color:var(--rust);margin-bottom:10px;}
+.reset-box .btnrow{display:flex;gap:8px;}
+
+.sidebar{width:220px;flex-shrink:0;background:var(--ink);color:var(--paper);display:flex;flex-direction:column;padding:24px 0;}
+.brand{padding:0 22px 22px 22px;border-bottom:1px solid rgba(241,236,222,0.15);margin-bottom:18px;}
+.brand .stamp{display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;border:2px solid var(--brass-light);border-radius:50%;transform:rotate(-8deg);margin-bottom:10px;}
+.brand .stamp svg{width:20px;height:20px;}
+.brand h1{font-family:'Fraunces',serif;font-size:19px;font-weight:600;margin:0;letter-spacing:0.3px;}
+.brand p{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;opacity:0.55;margin:4px 0 0 0;}
+nav{display:flex;flex-direction:column;gap:2px;padding:0 12px;}
+nav button{all:unset;cursor:pointer;padding:11px 14px;border-radius:6px;font-size:13.5px;font-weight:500;display:flex;align-items:center;gap:10px;color:rgba(241,236,222,0.75);}
+nav button svg{width:16px;height:16px;flex-shrink:0;opacity:0.85;}
+nav button:hover{background:rgba(241,236,222,0.07);color:var(--paper);}
+nav button.active{background:var(--brass);color:var(--ink);font-weight:600;}
+nav button.active svg{opacity:1;}
+.sidebar-foot{margin-top:auto;padding:14px 22px 0 22px;border-top:1px solid rgba(241,236,222,0.1);}
+.sidebar-foot .who{font-size:12px;font-weight:600;margin-bottom:8px;}
+.sidebar-foot button{all:unset;cursor:pointer;font-size:11px;font-family:'IBM Plex Mono',monospace;color:var(--brass-light);letter-spacing:0.5px;display:block;margin-bottom:6px;}
+
+main{flex:1;padding:32px 40px;max-width:1180px;}
+.page-head{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:26px;flex-wrap:wrap;gap:12px;}
+.page-head h2{font-family:'Fraunces',serif;font-size:28px;font-weight:600;margin:0 0 4px 0;}
+.page-head .sub{color:#6b6350;font-size:13.5px;}
+.btn{all:unset;cursor:pointer;background:var(--ink);color:var(--paper);padding:10px 18px;border-radius:6px;font-size:13px;font-weight:600;font-family:'Inter',sans-serif;}
+.btn:hover{background:#2c3b32;}
+.btn.ghost{background:transparent;color:var(--ink);border:1.5px solid var(--ink);}
+.btn.ghost:hover{background:rgba(31,42,36,0.06);}
+.btn.small{padding:6px 12px;font-size:12px;}
+.btn.tiny{padding:4px 9px;font-size:11px;}
+.btn.danger{background:var(--rust);}
+.btn.amber{background:var(--amber);}
+.btn[disabled]{opacity:0.55;cursor:not-allowed;}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px;margin-bottom:28px;}
+.stat-card{background:var(--paper-dark);border-radius:10px;padding:18px 20px;border:1px solid var(--line);}
+.stat-card .label{font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:1px;text-transform:uppercase;color:#75705a;margin-bottom:8px;}
+.stat-card .value{font-family:'Fraunces',serif;font-size:26px;font-weight:600;}
+.stat-card.moss .value{color:var(--moss);}
+.stat-card.rust .value{color:var(--rust);}
+
+.card{background:var(--paper-dark);border:1px solid var(--line);border-radius:10px;padding:20px;margin-bottom:16px;}
+.chart-wrap{background:var(--paper-dark);border:1px solid var(--line);border-radius:10px;padding:20px;margin-bottom:26px;}
+.chart-wrap h3{font-family:'Fraunces',serif;font-size:16px;margin:0 0 14px 0;}
+.chart-box{height:280px;position:relative;}
+
+.prop-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;}
+.prop-card{background:var(--paper-dark);border:1px solid var(--line);border-radius:12px;padding:18px;position:relative;overflow:hidden;}
+.prop-card .stamp-badge{position:absolute;top:14px;right:14px;font-family:'IBM Plex Mono',monospace;font-size:9.5px;font-weight:600;letter-spacing:1px;padding:4px 9px;border-radius:20px;border:1.5px solid;transform:rotate(4deg);}
+.stamp-badge.occ{color:var(--moss);border-color:var(--moss);background:var(--moss-light);}
+.stamp-badge.vac{color:var(--rust);border-color:var(--rust);background:var(--rust-light);}
+.prop-card h4{font-family:'Fraunces',serif;font-size:18px;margin:0 0 4px 0;padding-right:70px;}
+.prop-card .addr{font-size:12.5px;color:#75705a;margin-bottom:12px;}
+.prop-card .row{display:flex;justify-content:space-between;font-size:12.5px;padding:6px 0;border-top:1px dashed var(--line);}
+.prop-card .row span:first-child{color:#75705a;}
+.prop-card .row span:last-child{font-family:'IBM Plex Mono',monospace;font-weight:500;text-align:right;}
+.prop-card .chips{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0;}
+.chip{font-family:'IBM Plex Mono',monospace;font-size:10.5px;background:#fff;border:1px solid var(--line);padding:3px 9px;border-radius:20px;}
+.prop-card .actions{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap;}
+
+table{width:100%;border-collapse:collapse;font-size:13px;}
+th{text-align:left;font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:0.8px;text-transform:uppercase;color:#75705a;padding:8px 10px;border-bottom:2px solid var(--line);}
+td{padding:10px 10px;border-bottom:1px solid var(--line);}
+tr:last-child td{border-bottom:none;}
+.tag{font-family:'IBM Plex Mono',monospace;font-size:10.5px;padding:3px 8px;border-radius:20px;font-weight:600;white-space:nowrap;}
+.tag.late{background:var(--rust-light);color:var(--rust);}
+.tag.ok{background:var(--moss-light);color:var(--moss);}
+.tag.soon{background:var(--amber-light);color:var(--amber);}
+.tag.neutral{background:#eee;color:#75705a;}
+
+#map{height:480px;border-radius:10px;border:1px solid var(--line);}
+
+.overlay{position:fixed;inset:0;background:rgba(31,42,36,0.45);display:flex;align-items:center;justify-content:center;z-index:50;padding:20px;}
+.modal{background:var(--paper);border-radius:12px;padding:28px;width:100%;max-width:480px;max-height:88vh;overflow-y:auto;}
+.modal h3{font-family:'Fraunces',serif;font-size:20px;margin:0 0 18px 0;}
+.field{margin-bottom:13px;}
+.field label{display:block;font-size:11.5px;font-weight:600;color:#5c5744;margin-bottom:5px;font-family:'IBM Plex Mono',monospace;letter-spacing:0.3px;}
+.field input,.field select,.field textarea{width:100%;padding:9px 11px;border:1.5px solid var(--line);border-radius:6px;background:#fff;font-family:'Inter',sans-serif;font-size:13.5px;color:var(--ink);}
+.field textarea{resize:vertical;min-height:50px;}
+.field-row{display:flex;gap:10px;}
+.field-row .field{flex:1;}
+.field-check{display:flex;align-items:center;gap:8px;margin-bottom:13px;font-size:13px;}
+.field-check input{width:auto;}
+.addr-row{display:flex;gap:8px;align-items:flex-end;}
+.addr-row .field{flex:1;}
+.modal-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:20px;flex-wrap:wrap;}
+.empty{text-align:center;padding:50px 20px;color:#8a8468;}
+.empty .display{font-size:17px;color:var(--ink);margin-bottom:6px;}
+.detail-section{margin-bottom:16px;}
+.detail-section h5{font-family:'IBM Plex Mono',monospace;font-size:10.5px;text-transform:uppercase;letter-spacing:0.8px;color:#75705a;margin:0 0 8px 0;}
+.detail-row{display:flex;justify-content:space-between;font-size:13px;padding:5px 0;border-bottom:1px dashed var(--line);}
+.note-item{display:flex;align-items:flex-start;gap:10px;padding:12px 0;border-bottom:1px dashed var(--line);}
+.note-item:last-child{border-bottom:none;}
+.note-item input[type=checkbox]{margin-top:3px;}
+.note-item .txt{flex:1;font-size:13.5px;}
+.note-item .txt.done{text-decoration:line-through;color:#a09a80;}
+.note-item .date{font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:#8a8468;}
+.callout{background:var(--amber-light);border:1px solid var(--brass-light);border-radius:8px;padding:12px 14px;font-size:12.5px;color:#5c5744;margin-bottom:18px;}
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script>
+const ICONS = {
+  dashboard: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>',
+  properties: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 10l9-7 9 7v9a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>',
+  tenants: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>',
+  maintenance: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a4 4 0 00-5.4 5.4L3 18v3h3l6.3-6.3a4 4 0 005.4-5.4l-2.8 2.8-2-2z"/></svg>',
+  map: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 20l-6-3V4l6 3 6-3 6 3v13l-6-3-6 3z"/><path d="M9 4v13M15 7v13"/></svg>',
+  contacts: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M9 8h6M9 12h6M9 16h3"/></svg>',
+  notes: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>'
+};
+const PAGES = [
+  ['dashboard','Dashboard'],['properties','Properties'],['tenants','Tenants'],
+  ['maintenance','Maintenance'],['map','Map'],['contacts','Contacts'],['notes','Upcoming Plans']
+];
+const CONTACT_TYPES = ['Plumber','Electrician','Carpenter','Painter','Pest Control','AC Repair','Mason','Other'];
+const CURRENCIES = {
+  INR: {symbol:'₹', locale:'en-IN', label:'INR — Indian Rupee'},
+  USD: {symbol:'$', locale:'en-US', label:'USD — US Dollar'},
+  EUR: {symbol:'€', locale:'en-GB', label:'EUR — Euro'},
+  GBP: {symbol:'£', locale:'en-GB', label:'GBP — British Pound'},
+  AED: {symbol:'AED ', locale:'en-AE', label:'AED — UAE Dirham'},
+  AUD: {symbol:'A$', locale:'en-AU', label:'AUD — Australian Dollar'},
+  CAD: {symbol:'C$', locale:'en-CA', label:'CAD — Canadian Dollar'},
+  SGD: {symbol:'S$', locale:'en-SG', label:'SGD — Singapore Dollar'}
+};
+
+let appData = { profiles: [], activeProfileId: null, data: {}, appName: 'Rent Ledger' };
+let page = 'dashboard';
+let unlocked = false;
+let pendingLoginId = null;   // unused legacy, kept for safety
+let resettingId = null;      // profile id currently resetting password
+let confirmRemoveId = null;  // profile pending delete confirmation
+let showingSignup = false;
+let showingRecoveryFor = null; // {id} — just-created profile, showing recovery code
+let forgotStep = null;       // null | 'request' | 'newpassword'
+let leafletMap = null;
+let chartInstance = null;
+
+const STORE_KEY = 'rental-app-data-v3';
+const uid = () => Math.random().toString(36).slice(2,10);
+function money(n){
+  const cp = currentProfile();
+  const cur = CURRENCIES[(cp && cp.currency) || 'INR'];
+  return cur.symbol + Number(n||0).toLocaleString(cur.locale, {maximumFractionDigits:0});
+}
+const thisMonth = () => new Date().toISOString().slice(0,7);
+const today = () => new Date().toISOString().slice(0,10);
+const monthLabel = ym => { const [y,m]=ym.split('-'); return new Date(y,m-1).toLocaleString('default',{month:'short'})+" '"+y.slice(2); };
+
+async function loadData(){
+  try{
+    const r = await window.storage.get(STORE_KEY, false);
+    if(r && r.value) appData = Object.assign({profiles:[],activeProfileId:null,data:{},appName:'Rent Ledger'}, JSON.parse(r.value));
+  }catch(e){ /* no data yet */ }
+}
+async function saveData(){
+  try{ await window.storage.set(STORE_KEY, JSON.stringify(appData), false); }
+  catch(e){ console.error('save failed', e); }
+}
+
+/* current profile's dataset */
+function ds(){
+  const id = appData.activeProfileId;
+  if(!appData.data[id]) appData.data[id] = {properties:[],income:[],expenses:[],contacts:[],notes:[]};
+  const d = appData.data[id];
+  if(!d.notes) d.notes = [];
+  return d;
+}
+function currentProfile(){ return appData.profiles.find(p=>p.id===appData.activeProfileId); }
+function propName(id){ const p = ds().properties.find(p=>p.id===id); return p ? p.name : '—'; }
+function propContacts(propertyId){ return ds().contacts.filter(c=>c.propertyId===propertyId); }
+
+/* prevents double-submit: disables the clicked button & shows a loading label while fn runs */
+function withLoading(btn, fn){
+  if(!btn || btn.dataset.busy) return;
+  btn.dataset.busy = '1';
+  const orig = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = 'Saving…';
+  Promise.resolve().then(fn).finally(()=>{
+    try{ btn.disabled = false; btn.textContent = orig; delete btn.dataset.busy; }catch(e){}
+  });
+}
+
+/* ================= AUTH ================= */
+const genRecoveryCode = () => Array.from({length:3}, ()=>Math.random().toString(36).slice(2,6).toUpperCase()).join('-');
+
+function renderAuth(){
+  const root = document.getElementById('root');
+
+  if(showingRecoveryFor){
+    const p = appData.profiles.find(x=>x.id===showingRecoveryFor.id);
+    root.innerHTML = `
+    <div class="center-screen"><div class="auth-card">
+      <div class="stamp"><svg viewBox="0 0 24 24" fill="none" stroke="#B8863B" stroke-width="2" width="24" height="24"><path d="M3 10l9-7 9 7v9a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg></div>
+      <h2>Save Your Recovery Code</h2>
+      <p>This is the only way to reset your password if you forget it. Write it down or save a screenshot now.</p>
+      <div class="callout mono" style="text-align:center;font-size:16px;letter-spacing:1px;">${p.recoveryCode}</div>
+      <button class="btn" onclick="showingRecoveryFor=null;unlocked=true;appData.activeProfileId='${p.id}';boot();">I've saved it — continue</button>
+    </div></div>`;
+    return;
+  }
+
+  if(forgotStep === 'request'){
+    root.innerHTML = `
+    <div class="center-screen"><div class="auth-card">
+      <h2>Reset Password</h2>
+      <p>Enter your email and recovery code.</p>
+      <div class="field"><label>Email</label><input id="fp-email" type="email" placeholder="you@example.com"></div>
+      <div class="field"><label>Recovery Code</label><input id="fp-code" placeholder="XXXX-XXXX-XXXX" style="text-transform:uppercase;"></div>
+      <div id="fp-error" style="color:#A8462F;font-size:12px;margin-bottom:8px;"></div>
+      <button class="btn" id="fp-btn" onclick="withLoading(document.getElementById('fp-btn'), verifyRecovery)">Verify</button>
+      <button class="link-btn" style="margin-top:14px;" onclick="forgotStep=null;renderAuth();">Cancel</button>
+    </div></div>`;
+    return;
+  }
+  if(forgotStep === 'newpassword'){
+    root.innerHTML = `
+    <div class="center-screen"><div class="auth-card">
+      <h2>Set a New Password</h2>
+      <p>Your properties, tenants and records are untouched.</p>
+      <div class="field"><label>New Password (min 6 characters)</label><input id="np-pass" type="password"></div>
+      <div id="np-error" style="color:#A8462F;font-size:12px;margin-bottom:8px;"></div>
+      <button class="btn" id="np-btn" onclick="withLoading(document.getElementById('np-btn'), doNewPassword)">Save New Password</button>
+    </div></div>`;
+    return;
+  }
+
+  if(appData.profiles.length === 0 || showingSignup){
+    root.innerHTML = `
+    <div class="center-screen"><div class="auth-card">
+      <div class="stamp"><svg viewBox="0 0 24 24" fill="none" stroke="#B8863B" stroke-width="2" width="24" height="24"><path d="M3 10l9-7 9 7v9a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg></div>
+      <h2>Create Your Account</h2>
+      <p>${appData.profiles.length ? 'This creates a brand-new, separate set of properties.' : "You can add more accounts later (e.g. for family or staff) — each one keeps its own separate properties."}</p>
+      <div class="field"><label>Your Name</label><input id="su-name" placeholder="e.g. Ramesh"></div>
+      <div class="field"><label>Email</label><input id="su-email" type="email" placeholder="you@example.com"></div>
+      <div class="field"><label>Password (min 6 characters)</label><input id="su-pass" type="password" onkeydown="if(event.key==='Enter')withLoading(document.getElementById('su-btn'), doSetup)"></div>
+      <div id="su-error" style="color:#A8462F;font-size:12px;margin-bottom:8px;"></div>
+      <button class="btn" id="su-btn" onclick="withLoading(document.getElementById('su-btn'), doSetup)">Create Account</button>
+      ${appData.profiles.length ? '<button class="link-btn" style="margin-top:14px;" onclick="showingSignup=false;renderAuth();">Cancel</button>' :
+        '<div class="auth-note">Stored on this device for this app — not sent anywhere. A recovery code will be shown next so you can reset your password if you forget it.</div>'}
+    </div></div>`;
+    return;
+  }
+
+  root.innerHTML = `
+    <div class="center-screen"><div class="auth-card">
+      <div class="stamp"><svg viewBox="0 0 24 24" fill="none" stroke="#B8863B" stroke-width="2" width="24" height="24"><path d="M3 10l9-7 9 7v9a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg></div>
+      <h2>Welcome Back</h2>
+      <p>Sign in to your account.</p>
+      <div class="field"><label>Email</label><input id="lg-email" type="email" placeholder="you@example.com"></div>
+      <div class="field"><label>Password</label><input id="lg-pass" type="password" onkeydown="if(event.key==='Enter')withLoading(document.getElementById('lg-btn'), doLogin)"></div>
+      <button class="btn" id="lg-btn" onclick="withLoading(document.getElementById('lg-btn'), doLogin)">Sign In</button>
+      <div id="lg-error" style="color:#A8462F;font-size:12px;margin-top:10px;"></div>
+      <button class="link-btn" style="margin-top:14px;display:block;" onclick="forgotStep='request';renderAuth();">Forgot password?</button>
+      <button class="link-btn" style="margin-top:10px;" onclick="showingSignup=true;renderAuth();">+ Create another account</button>
+    </div></div>`;
+}
+
+async function doSetup(){
+  const name = document.getElementById('su-name').value.trim() || 'Landlord';
+  const email = document.getElementById('su-email').value.trim().toLowerCase();
+  const pass = document.getElementById('su-pass').value;
+  const err = document.getElementById('su-error');
+  if(!/^\S+@\S+\.\S+$/.test(email)){ err.textContent = 'Enter a valid email address.'; return; }
+  if(appData.profiles.some(p=>p.email===email)){ err.textContent = 'An account with this email already exists — sign in instead.'; return; }
+  if(pass.length < 6){ err.textContent = 'Password must be at least 6 characters.'; return; }
+  const id = uid();
+  const recoveryCode = genRecoveryCode();
+  appData.profiles.push({id, name, email, password: pass, recoveryCode, currency:'INR'});
+  await saveData();
+  showingSignup = false;
+  showingRecoveryFor = {id};
+  renderAuth();
+}
+function doLogin(){
+  const email = document.getElementById('lg-email').value.trim().toLowerCase();
+  const pass = document.getElementById('lg-pass').value;
+  const err = document.getElementById('lg-error');
+  const p = appData.profiles.find(x=>x.email===email);
+  if(!p){ err.textContent = 'No account found with that email.'; return; }
+  if(p.password !== pass){ err.textContent = 'Incorrect password.'; return; }
+  appData.activeProfileId = p.id; unlocked = true; boot();
+}
+function verifyRecovery(){
+  const email = document.getElementById('fp-email').value.trim().toLowerCase();
+  const code = document.getElementById('fp-code').value.trim().toUpperCase();
+  const err = document.getElementById('fp-error');
+  const p = appData.profiles.find(x=>x.email===email);
+  if(!p || p.recoveryCode !== code){ err.textContent = 'Email and recovery code don\u2019t match our records.'; return; }
+  forgotStep = 'newpassword';
+  resettingId = p.id;
+  renderAuth();
+}
+async function doNewPassword(){
+  const pass = document.getElementById('np-pass').value;
+  const err = document.getElementById('np-error');
+  if(pass.length < 6){ err.textContent = 'Password must be at least 6 characters.'; return; }
+  const p = appData.profiles.find(x=>x.id===resettingId);
+  p.password = pass;
+  await saveData();
+  appData.activeProfileId = p.id;
+  forgotStep = null; resettingId = null;
+  unlocked = true;
+  boot();
+}
+function lockApp(){ unlocked = false; boot(); }
+function switchAccount(){ unlocked = false; showingSignup = false; boot(); }
+async function removeAccount(id){
+  appData.profiles = appData.profiles.filter(p=>p.id!==id);
+  if(appData.data) delete appData.data[id];
+  if(appData.activeProfileId===id) appData.activeProfileId = null;
+  confirmRemoveId = null;
+  await saveData();
+  renderAuth();
+}
+
+/* ================= SHELL ================= */
+function boot(){
+  document.title = appData.appName || 'Rent Ledger';
+  if(!unlocked){ renderAuth(); return; }
+  const root = document.getElementById('root');
+  root.innerHTML = `<div class="app"><div class="sidebar">
+      <div class="brand">
+        <div class="stamp"><svg viewBox="0 0 24 24" fill="none" stroke="#D9AE6B" stroke-width="2"><path d="M3 10l9-7 9 7v9a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg></div>
+        <h1>${appData.appName || 'Rent Ledger'}</h1>
+        <p>Property Manager</p>
+      </div>
+      <nav id="nav"></nav>
+      <div class="sidebar-foot">
+        <div class="who">👤 ${currentProfile().name}</div>
+        <button onclick="openSettingsModal()">SETTINGS</button>
+        <button onclick="switchAccount()">SWITCH ACCOUNT</button>
+        <button onclick="lockApp()">LOCK APP</button>
+      </div>
+    </div><main id="main"></main></div>`;
+  render();
+}
+
+function renderNav(){
+  const nav = document.getElementById('nav');
+  nav.innerHTML = '';
+  PAGES.forEach(([key,label])=>{
+    const b = document.createElement('button');
+    b.className = key===page ? 'active' : '';
+    b.innerHTML = ICONS[key] + '<span>'+label+'</span>';
+    b.onclick = ()=>{ page = key; render(); };
+    nav.appendChild(b);
+  });
+}
+
+function render(){
+  renderNav();
+  const main = document.getElementById('main');
+  if(page==='dashboard') renderDashboard(main);
+  else if(page==='properties') renderProperties(main);
+  else if(page==='tenants') renderTenants(main);
+  else if(page==='maintenance') renderMaintenance(main);
+  else if(page==='map') renderMap(main);
+  else if(page==='contacts') renderContacts(main);
+  else if(page==='notes') renderNotes(main);
+}
+
+/* ================= DASHBOARD ================= */
+function renderDashboard(main){
+  const D = ds();
+  const mIncome = D.income.filter(i=>i.month===thisMonth()).reduce((s,i)=>s+Number(i.amount),0);
+  const mExpense = D.expenses.filter(e=>e.date && e.date.slice(0,7)===thisMonth()).reduce((s,e)=>s+Number(e.cost),0);
+  const rentRoll = D.properties.reduce((s,p)=>s+Number(p.rent||0),0);
+  const occCount = D.properties.filter(p=>p.occupancy==='occupied').length;
+
+  main.innerHTML = `
+    <div class="page-head"><div><h2>Dashboard</h2><div class="sub">Overview across all properties</div></div></div>
+    <div class="grid">
+      <div class="stat-card"><div class="label">Properties</div><div class="value">${D.properties.length}</div></div>
+      <div class="stat-card"><div class="label">Occupied</div><div class="value">${occCount}/${D.properties.length}</div></div>
+      <div class="stat-card"><div class="label">Monthly Rent Roll</div><div class="value">${money(rentRoll)}</div></div>
+      <div class="stat-card moss"><div class="label">Income — This Month</div><div class="value">${money(mIncome)}</div></div>
+      <div class="stat-card rust"><div class="label">Expenses — This Month</div><div class="value">${money(mExpense)}</div></div>
+      <div class="stat-card ${mIncome-mExpense>=0?'moss':'rust'}"><div class="label">Net — This Month</div><div class="value">${money(mIncome-mExpense)}</div></div>
+    </div>
+    <div class="chart-wrap">
+      <h3>Income vs Expenses — Last 6 Months</h3>
+      <div class="chart-box"><canvas id="mainChart"></canvas></div>
+    </div>
+    <div class="card">
+      <h3 class="display" style="margin:0 0 14px 0;font-size:16px;">Per-Property Performance (This Month)</h3>
+      ${D.properties.length===0 ? '<div class="empty">No properties yet. Add one from the Properties tab.</div>' : `
+      <table><thead><tr><th>Property</th><th>Rent</th><th>Received</th><th>Spent</th><th>Net</th></tr></thead><tbody>
+      ${D.properties.map(p=>{
+        const inc = D.income.filter(i=>i.propertyId===p.id && i.month===thisMonth()).reduce((s,i)=>s+Number(i.amount),0);
+        const exp = D.expenses.filter(e=>e.propertyId===p.id && e.date && e.date.slice(0,7)===thisMonth()).reduce((s,e)=>s+Number(e.cost),0);
+        return `<tr><td>${p.name}</td><td class="mono">${money(p.rent)}</td><td class="mono">${money(inc)}</td><td class="mono">${money(exp)}</td><td class="mono" style="color:${inc-exp>=0?'#4C6B54':'#A8462F'}">${money(inc-exp)}</td></tr>`;
+      }).join('')}
+      </tbody></table>`}
+    </div>
+  `;
+  drawChart();
+}
+
+function drawChart(){
+  const canvas = document.getElementById('mainChart');
+  if(!canvas) return;
+  const D = ds();
+  const months = [];
+  const d = new Date();
+  for(let i=5;i>=0;i--){
+    const dt = new Date(d.getFullYear(), d.getMonth()-i, 1);
+    months.push(dt.toISOString().slice(0,7));
+  }
+  const incomeData = months.map(m=>D.income.filter(i=>i.month===m).reduce((s,i)=>s+Number(i.amount),0));
+  const expenseData = months.map(m=>D.expenses.filter(e=>e.date && e.date.slice(0,7)===m).reduce((s,e)=>s+Number(e.cost),0));
+  if(chartInstance) chartInstance.destroy();
+  chartInstance = new Chart(canvas.getContext('2d'), {
+    type:'bar',
+    data:{ labels: months.map(monthLabel), datasets:[
+        {label:'Income', data:incomeData, backgroundColor:'#4C6B54', borderRadius:4, maxBarThickness:34},
+        {label:'Expenses', data:expenseData, backgroundColor:'#A8462F', borderRadius:4, maxBarThickness:34}
+    ]},
+    options:{ responsive:true, maintainAspectRatio:false,
+      plugins:{legend:{position:'bottom', labels:{font:{family:'Inter'}, boxWidth:12}}},
+      scales:{ y:{beginAtZero:true, grid:{color:'#D6CDB2'}, ticks:{font:{family:'IBM Plex Mono'}, callback:v=>CURRENCIES[(currentProfile().currency||'INR')].symbol.trim()+v}},
+        x:{grid:{display:false}, ticks:{font:{family:'IBM Plex Mono'}}} } }
+  });
+}
+
+/* ================= PROPERTIES ================= */
+function renderProperties(main){
+  const D = ds();
+  main.innerHTML = `
+    <div class="page-head">
+      <div><h2>Properties</h2><div class="sub">${D.properties.length} propert${D.properties.length===1?'y':'ies'} on record</div></div>
+      <button class="btn" id="add-prop-btn" onclick="openPropertyModal()">+ Add Property</button>
+    </div>
+    ${D.properties.length===0 ? '<div class="empty"><div class="display">No properties yet</div>Add your first rental property to get started.</div>' : `
+    <div class="prop-grid">
+      ${D.properties.map(p=>{
+        const contacts = propContacts(p.id);
+        return `
+        <div class="prop-card">
+          <div class="stamp-badge ${p.occupancy==='occupied'?'occ':'vac'}">${p.occupancy==='occupied'?'OCCUPIED':'VACANT'}</div>
+          <h4>${p.name}</h4>
+          <div class="addr">${p.address||'No address set'}</div>
+          <div class="row"><span>Monthly Rent</span><span>${money(p.rent)}</span></div>
+          <div class="row"><span>Ownership</span><span>${p.ownershipType==='multiple'?(p.owners?p.owners.length:0)+' Owners':'Single Owner'}</span></div>
+          <div class="row"><span>Tenant${p.tenants&&p.tenants.length>1?'s':''}</span><span>${p.tenants&&p.tenants.length?p.tenants.map(t=>t.name).join(', '):'—'}</span></div>
+          <div class="row"><span>Agreement</span><span>${p.agreementDone==='yes'?'Signed ✓':'Not signed'}</span></div>
+          <div class="chips">
+            ${contacts.length===0?'<span class="hint">No contacts linked yet</span>':contacts.map(c=>`<span class="chip">${c.type}: ${c.name}</span>`).join('')}
+          </div>
+          <div class="actions">
+            <button class="btn tiny" onclick="viewProperty('${p.id}')">View</button>
+            <button class="btn tiny ghost" onclick="openPropertyModal('${p.id}')">Edit</button>
+            <button class="btn tiny amber" data-role="pay" onclick="openIncomeModal('${p.id}')">Mark Rent Paid</button>
+            <button class="btn tiny ghost" onclick="openContactModal('${p.id}')">+ Contact</button>
+          </div>
+        </div>`;
+      }).join('')}
+    </div>`}
+  `;
+}
+
+function viewProperty(id){
+  const D = ds();
+  const p = D.properties.find(x=>x.id===id);
+  const contacts = propContacts(id);
+  const inc = D.income.filter(i=>i.propertyId===id).sort((a,b)=>b.month.localeCompare(a.month)).slice(0,4);
+  const exp = D.expenses.filter(e=>e.propertyId===id).sort((a,b)=>(b.date||'').localeCompare(a.date||'')).slice(0,4);
+  const modal = document.createElement('div');
+  modal.className = 'overlay';
+  modal.innerHTML = `
+    <div class="modal">
+      <h3>${p.name}</h3>
+      <div class="detail-section">
+        <h5>Overview</h5>
+        <div class="detail-row"><span>Address</span><span>${p.address||'—'}</span></div>
+        <div class="detail-row"><span>Monthly Rent</span><span class="mono">${money(p.rent)}</span></div>
+        <div class="detail-row"><span>Advance / Deposit</span><span class="mono">${money(p.advanceAmount)}</span></div>
+        <div class="detail-row"><span>Status</span><span>${p.occupancy==='occupied'?'Occupied':'Vacant'}</span></div>
+        <div class="detail-row"><span>Occupied Since (Lease Start)</span><span class="mono">${p.occupiedSince||'—'}</span></div>
+        <div class="detail-row"><span>Agreement</span><span>${p.agreementDone==='yes'?'Signed':'Not signed'}</span></div>
+        <div class="detail-row"><span>Rent Due Day</span><span class="mono">Day ${p.rentDueDay||'—'}</span></div>
+        <div class="detail-row"><span>Ownership</span><span>${p.ownershipType==='multiple'?(p.owners?p.owners.length:0)+' Owners':'Single Owner'}</span></div>
+      </div>
+      ${p.ownershipType==='multiple' ? `
+      <div class="detail-section">
+        <h5>Owners</h5>
+        ${(!p.owners||p.owners.length===0) ? '<div class="hint">No owners added.</div>' : p.owners.map(o=>`
+          <div class="detail-row"><span>${o.name||'Unnamed'}</span><span class="mono">${o.phone||'—'}</span></div>
+        `).join('')}
+      </div>` : ''}
+      <div class="detail-section">
+        <h5>Tenant${p.tenants&&p.tenants.length>1?'s':''} on the Lease</h5>
+        ${(!p.tenants||p.tenants.length===0) ? '<div class="hint">No tenants added.</div>' : p.tenants.map(t=>`
+          <div class="detail-row"><span>${t.name||'Unnamed'}</span><span class="mono">${t.phone||'—'}${t.email?' · '+t.email:''}${t.mailAlertEnabled?' · alerts on':''}</span></div>
+        `).join('')}
+      </div>
+      <div class="detail-section">
+        <h5>Linked Contacts</h5>
+        ${contacts.length===0?'<div class="hint">None yet.</div>':contacts.map(c=>`<div class="detail-row"><span>${c.type} — ${c.name}</span><span class="mono">${c.phone||'—'}</span></div>`).join('')}
+      </div>
+      <div class="detail-section">
+        <h5>Recent Rent Payments</h5>
+        ${inc.length===0?'<div class="hint">None recorded yet.</div>':inc.map(i=>`<div class="detail-row"><span>${monthLabel(i.month)}</span><span class="mono">${money(i.amount)} · Paid ${i.paidDate||''}</span></div>`).join('')}
+      </div>
+      <div class="detail-section">
+        <h5>Recent Maintenance</h5>
+        ${exp.length===0?'<div class="hint">None recorded yet.</div>':exp.map(e=>`<div class="detail-row"><span>${e.category}${e.description?' — '+e.description:''}</span><span class="mono">${money(e.cost)}</span></div>`).join('')}
+      </div>
+      <div class="modal-actions"><button class="btn ghost" onclick="closeModal()">Close</button></div>
+    </div>`;
+  document.body.appendChild(modal);
+}
+
+function openPropertyModal(id){
+  const D = ds();
+  const p = id ? D.properties.find(x=>x.id===id) : null;
+  const modal = document.createElement('div');
+  modal.className = 'overlay';
+  modal.innerHTML = `
+    <div class="modal">
+      <h3>${p?'Edit Property':'Add Property'}</h3>
+      <div class="field"><label>Property Name</label><input id="f-name" value="${p?p.name:''}" placeholder="e.g. Green Villa, Unit 2B"></div>
+      <div class="field-row">
+        <div class="field"><label>Ownership</label>
+          <select id="f-ownertype" onchange="document.getElementById('owner-section').style.display=this.value==='multiple'?'block':'none';">
+            <option value="single" ${(!p||p.ownershipType!=='multiple')?'selected':''}>Single Owner</option>
+            <option value="multiple" ${p&&p.ownershipType==='multiple'?'selected':''}>Multiple Owners</option>
+          </select>
+        </div>
+      </div>
+      <div id="owner-section" style="display:${p&&p.ownershipType==='multiple'?'block':'none'};">
+        <div class="field"><label>Number of Owners</label><input id="f-ownercount" type="number" min="2" value="${p&&p.owners&&p.owners.length?p.owners.length:2}"></div>
+        <div class="field"><label>Owners</label></div>
+        <div id="owner-rows"></div>
+        <button type="button" class="btn small ghost" style="margin-bottom:6px;" onclick="addOwnerRow()">+ Add Owner</button>
+        <div class="hint" style="margin-bottom:14px;">Everyone who co-owns this property — used to label who's involved when logging expenses.</div>
+      </div>
+      <div class="addr-row">
+        <div class="field"><label>Address</label><input id="f-address" value="${p?p.address||'':''}" placeholder="Street, city"></div>
+        <button class="btn small ghost" style="margin-bottom:13px;" id="geo-btn" onclick="withLoading(document.getElementById('geo-btn'), findCoords)">📍 Find on Map</button>
+      </div>
+      <div id="geo-status" class="hint"></div>
+      <div class="field-row">
+        <div class="field"><label>Latitude</label><input id="f-lat" value="${p?p.lat||'':''}" placeholder="e.g. 9.5810"></div>
+        <div class="field"><label>Longitude</label><input id="f-lng" value="${p?p.lng||'':''}" placeholder="e.g. 77.9624"></div>
+      </div>
+      <div class="hint" style="margin-top:-8px;margin-bottom:14px;">Can't find it automatically? Open Google Maps, long-press your property's location, then copy the two numbers shown at the bottom and paste them above.</div>
+      <div class="field-row">
+        <div class="field"><label>Monthly Rent</label><input id="f-rent" type="number" value="${p?p.rent||'':''}" placeholder="15000"></div>
+        <div class="field"><label>Occupancy</label>
+          <select id="f-occ"><option value="occupied" ${p&&p.occupancy==='occupied'?'selected':''}>Occupied</option><option value="vacant" ${p&&p.occupancy==='vacant'?'selected':''}>Vacant</option></select>
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field"><label>Advance / Security Deposit</label><input id="f-advance" type="number" value="${p?p.advanceAmount||'':''}" placeholder="e.g. 30000"></div>
+        <div class="field"><label>Rent Due Day (1–31)</label><input id="f-dueday" type="number" min="1" max="31" value="${p?p.rentDueDay||'':''}"></div>
+      </div>
+      <div class="field-row">
+        <div class="field"><label>Occupied Since (Lease Start Date)</label><input id="f-occsince" type="date" value="${p?p.occupiedSince||'':''}"></div>
+        <div class="field"><label>Agreement Signed?</label>
+          <select id="f-agree"><option value="no" ${p&&p.agreementDone==='no'?'selected':''}>No</option><option value="yes" ${p&&p.agreementDone==='yes'?'selected':''}>Yes</option></select>
+        </div>
+      </div>
+      <div class="field"><label>Tenants on the Lease</label></div>
+      <div id="tenant-rows"></div>
+      <button type="button" class="btn small ghost" style="margin-bottom:6px;" onclick="addTenantRow()">+ Add Tenant</button>
+      <div class="hint" style="margin-bottom:14px;">Add everyone signing the lease — each can have their own phone, email, and reminder setting.</div>
+      <div class="field"><label>Notes</label><textarea id="f-notes">${p?p.notes||'':''}</textarea></div>
+      <div class="modal-actions">
+        ${p?'<button class="btn danger" onclick="deleteProperty(\''+p.id+'\')">Delete</button>':''}
+        <button class="btn ghost" onclick="closeModal()">Cancel</button>
+        <button class="btn" id="prop-save-btn" onclick="withLoading(document.getElementById('prop-save-btn'), ()=>saveProperty('${p?p.id:''}'))">Save</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(modal);
+  const existingTenants = (p && p.tenants && p.tenants.length) ? p.tenants
+    : (p && p.tenantName) ? [{name:p.tenantName, phone:p.tenantPhone||'', email:p.tenantEmail||'', mailAlertEnabled: p.mailAlertEnabled==='yes'}]
+    : [];
+  if(existingTenants.length){ existingTenants.forEach(t=>addTenantRow(t)); }
+  else { addTenantRow(); }
+
+  const existingOwners = (p && p.owners && p.owners.length) ? p.owners : [];
+  if(existingOwners.length){ existingOwners.forEach(o=>addOwnerRow(o)); }
+  else if(p && p.ownershipType==='multiple'){ addOwnerRow(); addOwnerRow(); }
+}
+
+function ownerRowHtml(o){
+  return `<div class="tenant-row" data-oid="${o&&o.id?o.id:''}" style="border:1px solid var(--line);border-radius:8px;padding:10px;margin-bottom:8px;background:#fff;">
+    <div class="field-row">
+      <div class="field"><label>Owner Name</label><input class="o-name" value="${o?o.name||'':''}" placeholder="Owner name"></div>
+      <div class="field"><label>Phone</label><input class="o-phone" value="${o?o.phone||'':''}"></div>
+    </div>
+    <button type="button" class="link-btn" onclick="this.closest('.tenant-row').remove()">Remove this owner</button>
+  </div>`;
+}
+function addOwnerRow(o){
+  document.getElementById('owner-rows').insertAdjacentHTML('beforeend', ownerRowHtml(o));
+}
+
+function tenantRowHtml(t){
+  return `<div class="tenant-row" data-tid="${t&&t.id?t.id:''}" style="border:1px solid var(--line);border-radius:8px;padding:12px;margin-bottom:8px;background:#fff;">
+    <div class="field-row">
+      <div class="field"><label>Name</label><input class="t-name" value="${t?t.name||'':''}" placeholder="Tenant name"></div>
+      <div class="field"><label>Phone</label><input class="t-phone" value="${t?t.phone||'':''}"></div>
+    </div>
+    <div class="field-row" style="align-items:center;">
+      <div class="field"><label>Email</label><input class="t-email" value="${t?t.email||'':''}"></div>
+      <div class="field-check" style="margin-top:20px;"><input type="checkbox" class="t-alert" ${t&&t.mailAlertEnabled?'checked':''}><label style="margin:0;">Email alerts</label></div>
+    </div>
+    <button type="button" class="link-btn" onclick="this.closest('.tenant-row').remove()">Remove this tenant</button>
+  </div>`;
+}
+function addTenantRow(t){
+  document.getElementById('tenant-rows').insertAdjacentHTML('beforeend', tenantRowHtml(t));
+}
+
+async function findCoords(){
+  const address = document.getElementById('f-address').value.trim();
+  const status = document.getElementById('geo-status');
+  if(!address){ status.textContent = 'Type an address first.'; status.style.color = '#A8462F'; return; }
+  status.textContent = 'Searching…'; status.style.color = '#8a8468';
+  try{
+    const res = await fetch('https://nominatim.openstreetmap.org/search?format=json&limit=1&q=' + encodeURIComponent(address));
+    const data = await res.json();
+    if(data && data.length){
+      document.getElementById('f-lat').value = data[0].lat;
+      document.getElementById('f-lng').value = data[0].lon;
+      status.textContent = '✓ Location found and filled in below.'; status.style.color = '#4C6B54';
+    } else {
+      status.textContent = 'Could not find that address — try adding city/state, or enter coordinates manually below.'; status.style.color = '#A8462F';
+    }
+  }catch(e){
+    status.textContent = "This preview blocks outside lookups for safety — enter latitude/longitude manually below, or try again once you've downloaded and opened the file directly in your browser."; status.style.color = '#A8462F';
+  }
+}
+
+async function saveProperty(id){
+  const D = ds();
+  const data = {
+    name: document.getElementById('f-name').value.trim() || 'Untitled Property',
+    address: document.getElementById('f-address').value.trim(),
+    lat: document.getElementById('f-lat').value.trim(),
+    lng: document.getElementById('f-lng').value.trim(),
+    rent: document.getElementById('f-rent').value,
+    advanceAmount: document.getElementById('f-advance').value,
+    occupancy: document.getElementById('f-occ').value,
+    occupiedSince: document.getElementById('f-occsince').value,
+    agreementDone: document.getElementById('f-agree').value,
+    rentDueDay: document.getElementById('f-dueday').value,
+    notes: document.getElementById('f-notes').value.trim(),
+    tenants: Array.from(document.querySelectorAll('#tenant-rows .tenant-row')).map(row=>({
+      id: row.dataset.tid || uid(),
+      name: row.querySelector('.t-name').value.trim(),
+      phone: row.querySelector('.t-phone').value.trim(),
+      email: row.querySelector('.t-email').value.trim(),
+      mailAlertEnabled: row.querySelector('.t-alert').checked
+    })).filter(t=>t.name || t.phone || t.email),
+    ownershipType: document.getElementById('f-ownertype').value,
+    owners: document.getElementById('f-ownertype').value==='multiple'
+      ? Array.from(document.querySelectorAll('#owner-rows .tenant-row')).map(row=>({
+          id: row.dataset.oid || uid(),
+          name: row.querySelector('.o-name').value.trim(),
+          phone: row.querySelector('.o-phone').value.trim()
+        })).filter(o=>o.name || o.phone)
+      : []
+  };
+  if(id){
+    const existing = D.properties.find(x=>x.id===id);
+    delete existing.tenantName; delete existing.tenantPhone; delete existing.tenantEmail; delete existing.mailAlertEnabled;
+    Object.assign(existing, data);
+  }
+  else { D.properties.push({id: uid(), ...data}); }
+  await saveData();
+  closeModal();
+  render();
+}
+
+async function deleteProperty(id){
+  const D = ds();
+  D.properties = D.properties.filter(p=>p.id!==id);
+  D.income = D.income.filter(i=>i.propertyId!==id);
+  D.expenses = D.expenses.filter(e=>e.propertyId!==id);
+  D.contacts = D.contacts.filter(c=>c.propertyId!==id);
+  await saveData();
+  closeModal();
+  render();
+}
+
+function openIncomeModal(propertyId){
+  const p = ds().properties.find(x=>x.id===propertyId);
+  const modal = document.createElement('div');
+  modal.className = 'overlay';
+  modal.innerHTML = `
+    <div class="modal">
+      <h3>Mark Rent Paid — ${p.name}</h3>
+      <div class="field"><label>Month</label><input id="i-month" type="month" value="${thisMonth()}"></div>
+      <div class="field"><label>Amount</label><input id="i-amount" type="number" value="${p.rent||''}"></div>
+      <div class="hint" style="margin-bottom:14px;">Today's date (${today()}) will be recorded as the payment date automatically.</div>
+      <div class="modal-actions">
+        <button class="btn ghost" onclick="closeModal()">Cancel</button>
+        <button class="btn amber" id="income-save-btn" onclick="withLoading(document.getElementById('income-save-btn'), ()=>saveIncome('${propertyId}'))">✓ Mark as Paid</button>
+      </div>
+    </div>`;
+  document.body.appendChild(modal);
+}
+
+async function saveIncome(propertyId){
+  const D = ds();
+  const month = document.getElementById('i-month').value || thisMonth();
+  D.income = D.income.filter(i=>!(i.propertyId===propertyId && i.month===month));
+  D.income.push({ id: uid(), propertyId, month, amount: document.getElementById('i-amount').value || 0, paidDate: today() });
+  await saveData();
+  closeModal();
+  render();
+}
+
+function closeModal(){ document.querySelectorAll('.overlay').forEach(m=>m.remove()); }
+
+function openSettingsModal(){
+  const cp = currentProfile();
+  const opts = Object.keys(CURRENCIES).map(code=>`<option value="${code}" ${(cp.currency||'INR')===code?'selected':''}>${CURRENCIES[code].label}</option>`).join('');
+  const modal = document.createElement('div');
+  modal.className = 'overlay';
+  modal.innerHTML = `
+    <div class="modal" style="max-width:420px;">
+      <h3>Settings</h3>
+      <div class="field"><label>App Name</label><input id="set-appname" value="${appData.appName||'Rent Ledger'}" placeholder="e.g. Sures Properties"></div>
+      <div class="field"><label>Currency</label><select id="set-currency">${opts}</select></div>
+      <div class="hint" style="margin-bottom:14px;">Currency changes how amounts are displayed everywhere — your stored numbers don't change.</div>
+      <div class="detail-section">
+        <h5>Your Recovery Code</h5>
+        <div class="callout mono" style="text-align:center;font-size:14px;letter-spacing:1px;">${cp.recoveryCode}</div>
+        <div class="hint">Needed if you ever forget your password — keep it somewhere safe.</div>
+      </div>
+      <div class="detail-section">
+        <h5>Danger Zone</h5>
+        <button class="link-btn" style="color:#A8462F;" onclick="document.getElementById('del-acc-confirm').style.display='block';">Delete this account</button>
+        <div id="del-acc-confirm" style="display:none;" class="reset-box">
+          <div class="msg">This permanently deletes this login <b>and all its properties, tenants, and records</b>. There's no undo.</div>
+          <div class="btnrow">
+            <button class="btn small danger" style="width:auto;" onclick="removeAccount('${cp.id}');unlocked=false;showingSignup=false;renderAuth();">Yes, delete everything</button>
+            <button class="btn small ghost" style="width:auto;" onclick="document.getElementById('del-acc-confirm').style.display='none';">Cancel</button>
+          </div>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn ghost" onclick="closeModal()">Cancel</button>
+        <button class="btn" id="set-save-btn" onclick="withLoading(document.getElementById('set-save-btn'), saveSettings)">Save</button>
+      </div>
+    </div>`;
+  document.body.appendChild(modal);
+}
+async function saveSettings(){
+  appData.appName = document.getElementById('set-appname').value.trim() || 'Rent Ledger';
+  currentProfile().currency = document.getElementById('set-currency').value;
+  await saveData();
+  closeModal();
+  boot();
+}
+
+/* ================= TENANTS ================= */
+function renderTenants(main){
+  const D = ds();
+  const now = new Date();
+  main.innerHTML = `
+    <div class="page-head"><div><h2>Tenants</h2><div class="sub">Rent status for ${monthLabel(thisMonth())}</div></div></div>
+    ${D.properties.length===0 ? '<div class="empty">No properties yet.</div>' : `
+    <div class="card">
+    <table><thead><tr><th>Tenant</th><th>Property</th><th>Rent Due</th><th>Status</th><th>Remind</th></tr></thead><tbody>
+    ${D.properties.map(p=>{
+      if(p.occupancy!=='occupied') return `<tr><td colspan="5" style="color:#a09a80;">${p.name} — vacant</td></tr>`;
+      const paid = D.income.some(i=>i.propertyId===p.id && i.month===thisMonth());
+      const dueDay = Number(p.rentDueDay)||1;
+      const diff = dueDay - now.getDate();
+      let statusTag;
+      if(paid) statusTag = '<span class="tag ok">PAID</span>';
+      else if(diff < 0) statusTag = `<span class="tag late">${Math.abs(diff)} DAY${Math.abs(diff)===1?'':'S'} OVERDUE</span>`;
+      else if(diff <= 3) statusTag = `<span class="tag soon">DUE IN ${diff} DAY${diff===1?'':'S'}</span>`;
+      else statusTag = '<span class="tag neutral">PENDING</span>';
+      const tenants = (p.tenants && p.tenants.length) ? p.tenants : [{name:'—'}];
+      return tenants.map(t=>{
+        const alertsOn = t.mailAlertEnabled && t.email;
+        const mailto = alertsOn ? `mailto:${t.email}?subject=${encodeURIComponent('Rent reminder — '+p.name)}&body=${encodeURIComponent('Hi '+(t.name||'')+',\\n\\nThis is a reminder that rent of '+money(p.rent)+' for '+p.name+' is due on day '+dueDay+' of this month.\\n\\nThanks!')}` : null;
+        return `<tr>
+          <td>${t.name||'—'}</td>
+          <td>${p.name}</td>
+          <td class="mono">Day ${dueDay}</td>
+          <td>${statusTag}</td>
+          <td>${paid?'—':(mailto?`<a class="btn tiny amber" href="${mailto}" style="text-decoration:none;">✉ Email</a>`:'<span class="hint">Turn on alerts for this tenant</span>')}</td>
+        </tr>`;
+      }).join('');
+    }).join('')}
+    </tbody></table>
+    </div>
+    <div class="hint" style="margin-top:8px;">"✉ Email" opens a reminder in your own mail app — this only shows up if you've turned on "Enable rent-due email reminders" for that tenant on their property. Fully automatic scheduled emails (sent without you clicking anything) need a background server — see the Notes tab.</div>`}
+  `;
+}
+
+/* ================= MAINTENANCE ================= */
+let maintenanceFilterId = 'all';
+function renderMaintenance(main){
+  const D = ds();
+  let sorted = [...D.expenses].sort((a,b)=>(b.date||'').localeCompare(a.date||''));
+  if(maintenanceFilterId !== 'all') sorted = sorted.filter(e=>e.propertyId===maintenanceFilterId);
+  const filterOpts = `<option value="all">All properties</option>` + D.properties.map(p=>`<option value="${p.id}" ${maintenanceFilterId===p.id?'selected':''}>${p.name}${p.address?' — '+p.address:''}</option>`).join('');
+  main.innerHTML = `
+    <div class="page-head">
+      <div><h2>Maintenance & Expenses</h2><div class="sub">${D.expenses.length} entries logged</div></div>
+      <button class="btn" onclick="openExpenseModal()" ${D.properties.length===0?'disabled':''}>+ Log Expense</button>
+    </div>
+    ${D.properties.length===0 ? '<div class="empty">Add a property first before logging expenses.</div>' : `
+    <div class="field" style="max-width:320px;margin-bottom:16px;"><label>View by property</label><select onchange="maintenanceFilterId=this.value;render();">${filterOpts}</select></div>
+    ${sorted.length===0 ? '<div class="empty">No maintenance or expenses for this view.</div>' : `
+    <div class="card">
+    <table><thead><tr><th>Date</th><th>Property</th><th>Category</th><th>Description</th><th>Cost</th><th>Owner</th><th>Contact</th></tr></thead><tbody>
+    ${sorted.map(e=>{
+      const c = e.contactId ? D.contacts.find(x=>x.id===e.contactId) : null;
+      const prop = D.properties.find(x=>x.id===e.propertyId);
+      const owner = (prop && prop.owners) ? prop.owners.find(o=>o.id===e.ownerId) : null;
+      return `<tr>
+      <td class="mono">${e.date||'—'}</td>
+      <td>${propName(e.propertyId)}</td>
+      <td><span class="tag neutral">${e.category}</span></td>
+      <td>${e.description||'—'}</td>
+      <td class="mono">${money(e.cost)}</td>
+      <td>${owner?owner.name:(prop&&prop.ownershipType==='multiple'?'—':'—')}</td>
+      <td class="mono">${c?c.name+(c.phone?' · '+c.phone:''):'—'}</td>
+    </tr>`;}).join('')}
+    </tbody></table>
+    </div>`}`}
+  `;
+}
+
+function openExpenseModal(){
+  const opts = ds().properties.map(p=>`<option value="${p.id}">${p.name}${p.address?' — '+p.address:''}</option>`).join('');
+  const modal = document.createElement('div');
+  modal.className = 'overlay';
+  modal.innerHTML = `
+    <div class="modal">
+      <h3>Log Maintenance / Expense</h3>
+      <div class="field"><label>Property</label><select id="e-prop" onchange="refreshContactOptions()">${opts}</select></div>
+      <div class="field-row">
+        <div class="field"><label>Category</label>
+          <select id="e-cat" onchange="document.getElementById('e-cat-other').style.display=this.value==='Other'?'block':'none';">
+            <option>Repair</option><option>Insurance</option><option>Property Tax</option><option>Utilities</option><option>Cleaning</option><option>Pest Control</option><option>Other</option>
+          </select>
+        </div>
+        <div class="field"><label>Cost</label><input id="e-cost" type="number" placeholder="0"></div>
+      </div>
+      <div class="field" id="e-cat-other" style="display:none;"><label>Type the category</label><input id="e-cat-custom" placeholder="e.g. Pipe replacement"></div>
+      <div class="field"><label>Description <span style="color:#A8462F;">(always fill this in — this is how you'll track who fixed what later)</span></label><input id="e-desc" placeholder="e.g. Fixed kitchen tap leak"></div>
+      <div class="field"><label>Date</label><input id="e-date" type="date" value="${today()}"></div>
+      <div class="field" id="e-owner-field" style="display:none;"><label>Owner (which co-owner is this for/reported by)</label><select id="e-owner"></select></div>
+      <div class="field"><label>Contact who did the work</label><select id="e-contact"></select></div>
+      <div class="hint" style="margin-bottom:10px;">Don't see them? Add them from the Contacts page first — then they'll show up here.</div>
+      <div class="modal-actions">
+        <button class="btn ghost" onclick="closeModal()">Cancel</button>
+        <button class="btn" id="exp-save-btn" onclick="withLoading(document.getElementById('exp-save-btn'), saveExpense)">Save</button>
+      </div>
+    </div>`;
+  document.body.appendChild(modal);
+  refreshContactOptions();
+}
+
+function refreshContactOptions(){
+  const propId = document.getElementById('e-prop').value;
+  const sel = document.getElementById('e-contact');
+  const contacts = propContacts(propId);
+  sel.innerHTML = '<option value="">— None —</option>' + contacts.map(c=>`<option value="${c.id}">${c.type} — ${c.name}${c.phone?' ('+c.phone+')':''}</option>`).join('');
+
+  const prop = ds().properties.find(p=>p.id===propId);
+  const ownerField = document.getElementById('e-owner-field');
+  const ownerSel = document.getElementById('e-owner');
+  if(prop && prop.ownershipType==='multiple' && prop.owners && prop.owners.length){
+    ownerField.style.display = 'block';
+    ownerSel.innerHTML = '<option value="">— Not specified —</option>' + prop.owners.map(o=>`<option value="${o.id}">${o.name}</option>`).join('');
+  } else {
+    ownerField.style.display = 'none';
+    ownerSel.innerHTML = '';
+  }
+}
+
+async function saveExpense(){
+  const D = ds();
+  const cat = document.getElementById('e-cat').value;
+  const category = cat==='Other' ? (document.getElementById('e-cat-custom').value.trim() || 'Other') : cat;
+  D.expenses.push({
+    id: uid(),
+    propertyId: document.getElementById('e-prop').value,
+    category,
+    cost: document.getElementById('e-cost').value || 0,
+    description: document.getElementById('e-desc').value.trim(),
+    date: document.getElementById('e-date').value,
+    ownerId: document.getElementById('e-owner') ? (document.getElementById('e-owner').value || null) : null,
+    contactId: document.getElementById('e-contact').value || null
+  });
+  await saveData();
+  closeModal();
+  render();
+}
+
+/* ================= MAP ================= */
+function renderMap(main){
+  const D = ds();
+  main.innerHTML = `
+    <div class="page-head"><div><h2>Property Map</h2><div class="sub">Pins are set when you enter or find coordinates while adding a property</div></div></div>
+    <div class="callout">If pins or map tiles don't load here, it's usually because this in-chat preview blocks live connections to outside map services for safety. Download the file (via the button above the chat) and open it directly in your own browser — the map works normally there with a regular internet connection.</div>
+    <div id="map"></div>
+  `;
+  const withCoords = D.properties.filter(p=>p.lat && p.lng);
+  const center = withCoords.length ? [Number(withCoords[0].lat), Number(withCoords[0].lng)] : [22.9734, 78.6569];
+  setTimeout(()=>{
+    try{
+      if(leafletMap){ leafletMap.remove(); leafletMap = null; }
+      leafletMap = L.map('map').setView(center, withCoords.length ? 11 : 5);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '&copy; OpenStreetMap contributors' }).addTo(leafletMap);
+      if(withCoords.length===0){
+        L.popup().setLatLng(center).setContent('No pins yet — edit a property and add latitude/longitude.').openOn(leafletMap);
+      }
+      withCoords.forEach(p=>{
+        L.marker([Number(p.lat), Number(p.lng)]).addTo(leafletMap)
+          .bindPopup(`<b>${p.name}</b><br>${p.address||''}<br>Rent: ${money(p.rent)}<br>${p.occupancy==='occupied'?'Occupied':'Vacant'}`);
+      });
+    }catch(e){
+      document.getElementById('map').innerHTML = '<div class="empty">Map could not load in this preview. Download and open the file directly in your browser to view it.</div>';
+    }
+  }, 50);
+}
+
+/* ================= CONTACTS ================= */
+function renderContacts(main){
+  const D = ds();
+  main.innerHTML = `
+    <div class="page-head">
+      <div><h2>Contacts</h2><div class="sub">Plumbers, electricians and other vendors, organized by property</div></div>
+      <button class="btn" onclick="openContactModal()" ${D.properties.length===0?'disabled':''}>+ Add Contact</button>
+    </div>
+    ${D.properties.length===0 ? '<div class="empty">Add a property first, then add contacts for it.</div>' :
+    D.contacts.length===0 ? '<div class="empty">No contacts yet. Add your plumber, electrician, etc.</div>' : `
+    <div class="prop-grid">
+    ${D.contacts.map(c=>`
+      <div class="prop-card">
+        <h4 style="padding-right:0;">${c.name}</h4>
+        <div class="addr">${c.type} · ${propName(c.propertyId)}</div>
+        <div class="row"><span>Phone</span><span>${c.phone||'—'}</span></div>
+        <div class="row"><span>Notes</span><span>${c.notes||'—'}</span></div>
+        <div class="actions">
+          <button class="btn tiny ghost" onclick="openContactModal('${c.propertyId}','${c.id}')">Edit</button>
+          <button class="btn tiny danger" onclick="deleteContact('${c.id}')">Remove</button>
+        </div>
+      </div>
+    `).join('')}
+    </div>`}
+  `;
+}
+
+function openContactModal(propertyId, contactId){
+  const D = ds();
+  const c = contactId ? D.contacts.find(x=>x.id===contactId) : null;
+  if(c) propertyId = c.propertyId;
+  const opts = D.properties.map(p=>`<option value="${p.id}" ${p.id===propertyId?'selected':''}>${p.name}${p.address?' — '+p.address:''}</option>`).join('');
+  const isCustomType = c && !CONTACT_TYPES.includes(c.type);
+  const typeOpts = CONTACT_TYPES.map(t=>`<option ${c&&c.type===t?'selected':''}>${t}</option>`).join('');
+  const modal = document.createElement('div');
+  modal.className = 'overlay';
+  modal.innerHTML = `
+    <div class="modal">
+      <h3>${c?'Edit Contact':'Add Contact'}</h3>
+      <div class="field"><label>Property</label><select id="c-prop">${opts}</select></div>
+      <div class="field-row">
+        <div class="field"><label>Type / Occupation</label>
+          <select id="c-type" onchange="document.getElementById('c-type-other').style.display=this.value==='Other'?'block':'none';">
+            ${typeOpts}<option value="Other" ${isCustomType?'selected':''}>Other</option>
+          </select>
+        </div>
+        <div class="field"><label>Name</label><input id="c-name" value="${c?c.name:''}" placeholder="e.g. Suresh"></div>
+      </div>
+      <div class="field" id="c-type-other" style="display:${isCustomType?'block':'none'};"><label>Type the occupation</label><input id="c-type-custom" value="${isCustomType?c.type:''}" placeholder="e.g. Locksmith"></div>
+      <div class="field"><label>Phone</label><input id="c-phone" value="${c?c.phone||'':''}" placeholder="e.g. 98765 43210"></div>
+      <div class="field"><label>Notes</label><input id="c-notes" value="${c?c.notes||'':''}" placeholder="optional"></div>
+      <div class="modal-actions">
+        ${c?'<button class="btn danger" onclick="deleteContact(\''+c.id+'\')">Delete</button>':''}
+        <button class="btn ghost" onclick="closeModal()">Cancel</button>
+        <button class="btn" id="contact-save-btn" onclick="withLoading(document.getElementById('contact-save-btn'), ()=>saveContact('${c?c.id:''}'))">Save</button>
+      </div>
+    </div>`;
+  document.body.appendChild(modal);
+}
+
+async function saveContact(id){
+  const D = ds();
+  const typeVal = document.getElementById('c-type').value;
+  const type = typeVal==='Other' ? (document.getElementById('c-type-custom').value.trim() || 'Other') : typeVal;
+  const data = {
+    propertyId: document.getElementById('c-prop').value,
+    type,
+    name: document.getElementById('c-name').value.trim() || 'Unnamed',
+    phone: document.getElementById('c-phone').value.trim(),
+    notes: document.getElementById('c-notes').value.trim()
+  };
+  if(id){ Object.assign(D.contacts.find(x=>x.id===id), data); }
+  else { D.contacts.push({id: uid(), ...data}); }
+  await saveData();
+  closeModal();
+  render();
+}
+async function deleteContact(id){
+  const D = ds();
+  D.contacts = D.contacts.filter(c=>c.id!==id);
+  await saveData();
+  closeModal();
+  render();
+}
+
+/* ================= NOTES / UPCOMING PLANS ================= */
+function renderNotes(main){
+  const D = ds();
+  const sorted = [...D.notes].sort((a,b)=>(a.done===b.done?0:a.done?1:-1));
+  main.innerHTML = `
+    <div class="page-head">
+      <div><h2>Upcoming Plans</h2><div class="sub">Reminders and to-dos that don't belong to one property — renewals, planned repairs, ideas</div></div>
+    </div>
+    <div class="card">
+      <div class="field-row" style="align-items:flex-end;">
+        <div class="field" style="flex:2;"><label>What's coming up?</label><input id="note-text" placeholder="e.g. Renew Green Villa agreement in August"></div>
+        <div class="field"><label>Target Date</label><input id="note-date" type="date"></div>
+        <button class="btn" id="note-add-btn" style="margin-bottom:13px;" onclick="withLoading(document.getElementById('note-add-btn'), addNote)">Add</button>
+      </div>
+    </div>
+    <div class="card">
+      ${sorted.length===0?'<div class="empty">No upcoming plans yet.</div>':sorted.map(n=>`
+        <div class="note-item">
+          <input type="checkbox" ${n.done?'checked':''} onchange="toggleNote('${n.id}')">
+          <div class="txt ${n.done?'done':''}">${n.text}${n.date?` <span class="date">· ${n.date}</span>`:''}</div>
+          <button class="btn tiny danger" onclick="deleteNote('${n.id}')">Remove</button>
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
+async function addNote(){
+  const text = document.getElementById('note-text').value.trim();
+  if(!text) return;
+  const D = ds();
+  D.notes.push({id: uid(), text, date: document.getElementById('note-date').value, done:false});
+  await saveData();
+  render();
+}
+async function toggleNote(id){
+  const n = ds().notes.find(x=>x.id===id);
+  n.done = !n.done;
+  await saveData();
+  render();
+}
+async function deleteNote(id){
+  const D = ds();
+  D.notes = D.notes.filter(n=>n.id!==id);
+  await saveData();
+  render();
+}
+
+/* ================= INIT ================= */
+(async function(){
+  await loadData();
+  renderAuth();
+})();
+</script>
+</body>
+</html>
