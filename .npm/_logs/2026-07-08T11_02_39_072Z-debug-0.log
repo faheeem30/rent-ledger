@@ -1,0 +1,214 @@
+0 verbose cli C:\Program Files\nodejs\node.exe C:\Users\moham\AppData\Roaming\npm\node_modules\npm\bin\npm-cli.js
+1 info using npm@10.9.0
+2 info using node@v24.18.0
+3 silly config load:file:C:\Users\moham\AppData\Roaming\npm\node_modules\npm\npmrc
+4 silly config load:file:C:\rent-ledger-aws\.npmrc
+5 silly config load:file:C:\Users\moham\.npmrc
+6 silly config load:file:C:\Users\moham\AppData\Roaming\npm\etc\npmrc
+7 verbose title npm ci
+8 verbose argv "ci" "--cache" ".npm" "--prefer-offline"
+9 verbose logfile logs-max:10 dir:C:\rent-ledger-aws\.npm\_logs\2026-07-08T11_02_39_072Z-
+10 verbose logfile C:\rent-ledger-aws\.npm\_logs\2026-07-08T11_02_39_072Z-debug-0.log
+11 silly logfile done cleaning log files
+12 silly packumentCache heap:4496293888 maxSize:1124073472 maxEntrySize:562036736
+13 silly idealTree buildDeps
+14 silly fetch manifest react@^16.8 || ^17.0 || ^18.0
+15 silly packumentCache full:https://registry.npmjs.org/react cache-miss
+16 http fetch GET 200 https://registry.npmjs.org/npm 2476ms
+17 http fetch GET 200 https://registry.npmjs.org/react 363ms (cache miss)
+18 silly packumentCache full:https://registry.npmjs.org/react set size:undefined disposed:false
+19 silly fetch manifest react-dom@^16.8 || ^17.0 || ^18.0
+20 silly packumentCache full:https://registry.npmjs.org/react-dom cache-miss
+21 http fetch GET 200 https://registry.npmjs.org/react-dom 233ms (cache miss)
+22 silly packumentCache full:https://registry.npmjs.org/react-dom set size:undefined disposed:false
+23 silly placeDep ROOT react@18.3.1 OK for: @aws-amplify/codegen-ui-react@2.20.5 want: ^16.8 || ^17.0 || ^18.0
+24 silly placeDep ROOT react-dom@18.3.1 OK for: @aws-amplify/codegen-ui-react@2.20.5 want: ^16.8 || ^17.0 || ^18.0
+25 silly fetch manifest scheduler@^0.23.2
+26 silly packumentCache full:https://registry.npmjs.org/scheduler cache-miss
+27 http fetch GET 200 https://registry.npmjs.org/scheduler 181ms (cache miss)
+28 silly packumentCache full:https://registry.npmjs.org/scheduler set size:undefined disposed:false
+29 silly fetch manifest @aws-cdk/cli-plugin-contract@^2
+30 silly packumentCache full:https://registry.npmjs.org/@aws-cdk%2fcli-plugin-contract cache-miss
+31 http fetch GET 200 https://registry.npmjs.org/@aws-cdk%2fcli-plugin-contract 629ms (cache miss)
+32 silly packumentCache full:https://registry.npmjs.org/@aws-cdk%2fcli-plugin-contract set size:undefined disposed:false
+33 silly placeDep ROOT @aws-cdk/cli-plugin-contract@2.182.2 OK for: @aws-cdk/toolkit-lib@1.19.0 want: ^2
+34 silly placeDep ROOT scheduler@0.23.2 OK for: react-dom@18.3.1 want: ^0.23.2
+35 silly fetch manifest zod@3.25.17
+36 silly packumentCache full:https://registry.npmjs.org/zod cache-miss
+37 http fetch GET 200 https://registry.npmjs.org/zod 133ms (cache miss)
+38 silly packumentCache full:https://registry.npmjs.org/zod set size:undefined disposed:false
+39 silly placeDep ROOT zod@3.25.17 KEEP for: @aws-amplify/backend-output-schemas@1.8.0 want: 3.25.17
+40 warn ERESOLVE overriding peer dependency {
+40 warn ERESOLVE   code: 'ERESOLVE',
+40 warn ERESOLVE   edge: {
+40 warn ERESOLVE     type: 'peer',
+40 warn ERESOLVE     name: 'zod',
+40 warn ERESOLVE     spec: '3.25.17',
+40 warn ERESOLVE     error: 'PEER LOCAL',
+40 warn ERESOLVE     from: {
+40 warn ERESOLVE       name: '@aws-amplify/backend-output-schemas',
+40 warn ERESOLVE       version: '1.8.0',
+40 warn ERESOLVE       location: 'node_modules/@aws-amplify/data-construct/node_modules/@aws-amplify/backend-output-schemas',
+40 warn ERESOLVE       isWorkspace: false,
+40 warn ERESOLVE       dependents: [Array]
+40 warn ERESOLVE     }
+40 warn ERESOLVE   },
+40 warn ERESOLVE   dep: {
+40 warn ERESOLVE     name: 'zod',
+40 warn ERESOLVE     version: '3.25.17',
+40 warn ERESOLVE     whileInstalling: {
+40 warn ERESOLVE       name: '@aws-amplify/backend-output-schemas',
+40 warn ERESOLVE       version: '1.8.0',
+40 warn ERESOLVE       path: 'C:\\rent-ledger-aws\\node_modules\\@aws-amplify\\data-construct\\node_modules\\@aws-amplify\\backend-output-schemas'
+40 warn ERESOLVE     },
+40 warn ERESOLVE     location: 'node_modules/zod',
+40 warn ERESOLVE     isWorkspace: false,
+40 warn ERESOLVE     dependents: [ [Object] ]
+40 warn ERESOLVE   },
+40 warn ERESOLVE   force: false,
+40 warn ERESOLVE   isMine: false,
+40 warn ERESOLVE   strictPeerDeps: false,
+40 warn ERESOLVE   current: {
+40 warn ERESOLVE     name: 'zod',
+40 warn ERESOLVE     version: '3.25.17',
+40 warn ERESOLVE     location: 'node_modules/@aws-amplify/data-construct/node_modules/@aws-amplify/backend-output-schemas/node_modules/zod',
+40 warn ERESOLVE     isWorkspace: false,
+40 warn ERESOLVE     dependents: []
+40 warn ERESOLVE   }
+40 warn ERESOLVE }
+41 silly fetch manifest @opentelemetry/core@2.0.0
+42 silly packumentCache full:https://registry.npmjs.org/@opentelemetry%2fcore cache-miss
+43 http fetch GET 200 https://registry.npmjs.org/@opentelemetry%2fcore 77ms (cache miss)
+44 silly packumentCache full:https://registry.npmjs.org/@opentelemetry%2fcore set size:undefined disposed:false
+45 silly fetch manifest @opentelemetry/api@>=1.3.0 <1.10.0
+46 silly packumentCache full:https://registry.npmjs.org/@opentelemetry%2fapi cache-miss
+47 http fetch GET 200 https://registry.npmjs.org/@opentelemetry%2fapi 57ms (cache miss)
+48 silly packumentCache full:https://registry.npmjs.org/@opentelemetry%2fapi set size:undefined disposed:false
+49 silly placeDep node_modules/@aws-amplify/data-construct/node_modules/@opentelemetry/resources @opentelemetry/core@2.0.0 OK for: @opentelemetry/resources@2.0.0 want: 2.0.0
+50 silly placeDep node_modules/@aws-amplify/data-construct/node_modules/@opentelemetry/sdk-trace-base @opentelemetry/core@2.0.0 OK for: @opentelemetry/sdk-trace-base@2.0.0 want: 2.0.0
+51 silly fetch manifest uuid@^9.0.1
+52 silly packumentCache full:https://registry.npmjs.org/uuid cache-miss
+53 http fetch GET 200 https://registry.npmjs.org/uuid 55ms (cache miss)
+54 silly packumentCache full:https://registry.npmjs.org/uuid set size:undefined disposed:false
+55 silly placeDep node_modules/@aws-amplify/data-construct/node_modules/@smithy/middleware-retry uuid@9.0.1 OK for: @smithy/middleware-retry@3.0.34 want: ^9.0.1
+56 silly placeDep ROOT zod@3.25.17 KEEP for: @aws-amplify/backend-output-schemas@1.8.0 want: 3.25.17
+57 warn ERESOLVE overriding peer dependency {
+57 warn ERESOLVE   code: 'ERESOLVE',
+57 warn ERESOLVE   edge: {
+57 warn ERESOLVE     type: 'peer',
+57 warn ERESOLVE     name: 'zod',
+57 warn ERESOLVE     spec: '3.25.17',
+57 warn ERESOLVE     error: 'PEER LOCAL',
+57 warn ERESOLVE     from: {
+57 warn ERESOLVE       name: '@aws-amplify/backend-output-schemas',
+57 warn ERESOLVE       version: '1.8.0',
+57 warn ERESOLVE       location: 'node_modules/@aws-amplify/graphql-api-construct/node_modules/@aws-amplify/backend-output-schemas',
+57 warn ERESOLVE       isWorkspace: false,
+57 warn ERESOLVE       dependents: [Array]
+57 warn ERESOLVE     }
+57 warn ERESOLVE   },
+57 warn ERESOLVE   dep: {
+57 warn ERESOLVE     name: 'zod',
+57 warn ERESOLVE     version: '3.25.17',
+57 warn ERESOLVE     whileInstalling: {
+57 warn ERESOLVE       name: '@aws-amplify/backend-output-schemas',
+57 warn ERESOLVE       version: '1.8.0',
+57 warn ERESOLVE       path: 'C:\\rent-ledger-aws\\node_modules\\@aws-amplify\\graphql-api-construct\\node_modules\\@aws-amplify\\backend-output-schemas'
+57 warn ERESOLVE     },
+57 warn ERESOLVE     location: 'node_modules/zod',
+57 warn ERESOLVE     isWorkspace: false,
+57 warn ERESOLVE     dependents: [ [Object] ]
+57 warn ERESOLVE   },
+57 warn ERESOLVE   force: false,
+57 warn ERESOLVE   isMine: false,
+57 warn ERESOLVE   strictPeerDeps: false,
+57 warn ERESOLVE   current: {
+57 warn ERESOLVE     name: 'zod',
+57 warn ERESOLVE     version: '3.25.17',
+57 warn ERESOLVE     location: 'node_modules/@aws-amplify/graphql-api-construct/node_modules/@aws-amplify/backend-output-schemas/node_modules/zod',
+57 warn ERESOLVE     isWorkspace: false,
+57 warn ERESOLVE     dependents: []
+57 warn ERESOLVE   }
+57 warn ERESOLVE }
+58 silly placeDep node_modules/@aws-amplify/graphql-api-construct/node_modules/@opentelemetry/resources @opentelemetry/core@2.0.0 OK for: @opentelemetry/resources@2.0.0 want: 2.0.0
+59 silly placeDep node_modules/@aws-amplify/graphql-api-construct/node_modules/@opentelemetry/sdk-trace-base @opentelemetry/core@2.0.0 OK for: @opentelemetry/sdk-trace-base@2.0.0 want: 2.0.0
+60 silly placeDep node_modules/@aws-amplify/graphql-api-construct/node_modules/@smithy/middleware-retry uuid@9.0.1 OK for: @smithy/middleware-retry@3.0.34 want: ^9.0.1
+61 verbose stack Error: 
+61 verbose stack `npm ci` can only install packages when your package.json and package-lock.json or npm-shrinkwrap.json are in sync. Please update your lock file with `npm install` before continuing.
+61 verbose stack
+61 verbose stack Missing: react@18.3.1 from lock file
+61 verbose stack Missing: react-dom@18.3.1 from lock file
+61 verbose stack Missing: @aws-cdk/cli-plugin-contract@2.182.2 from lock file
+61 verbose stack Missing: scheduler@0.23.2 from lock file
+61 verbose stack Missing: @opentelemetry/core@2.0.0 from lock file
+61 verbose stack Missing: @opentelemetry/core@2.0.0 from lock file
+61 verbose stack Missing: uuid@9.0.1 from lock file
+61 verbose stack Missing: @opentelemetry/core@2.0.0 from lock file
+61 verbose stack Missing: @opentelemetry/core@2.0.0 from lock file
+61 verbose stack Missing: uuid@9.0.1 from lock file
+61 verbose stack
+61 verbose stack Clean install a project
+61 verbose stack
+61 verbose stack Usage:
+61 verbose stack npm ci
+61 verbose stack
+61 verbose stack Options:
+61 verbose stack [--install-strategy <hoisted|nested|shallow|linked>] [--legacy-bundling]
+61 verbose stack [--global-style] [--omit <dev|optional|peer> [--omit <dev|optional|peer> ...]]
+61 verbose stack [--include <prod|dev|optional|peer> [--include <prod|dev|optional|peer> ...]]
+61 verbose stack [--strict-peer-deps] [--foreground-scripts] [--ignore-scripts] [--no-audit]
+61 verbose stack [--no-bin-links] [--no-fund] [--dry-run]
+61 verbose stack [-w|--workspace <workspace-name> [-w|--workspace <workspace-name> ...]]
+61 verbose stack [-ws|--workspaces] [--include-workspace-root] [--install-links]
+61 verbose stack
+61 verbose stack aliases: clean-install, ic, install-clean, isntall-clean
+61 verbose stack
+61 verbose stack Run "npm help ci" for more info
+61 verbose stack     at CI.usageError (C:\Users\moham\AppData\Roaming\npm\node_modules\npm\lib\base-cmd.js:111:26)
+61 verbose stack     at CI.exec (C:\Users\moham\AppData\Roaming\npm\node_modules\npm\lib\commands\ci.js:70:18)
+61 verbose stack     at async Npm.exec (C:\Users\moham\AppData\Roaming\npm\node_modules\npm\lib\npm.js:207:9)
+61 verbose stack     at async module.exports (C:\Users\moham\AppData\Roaming\npm\node_modules\npm\lib\cli\entry.js:74:5)
+62 error code EUSAGE
+63 error
+63 error `npm ci` can only install packages when your package.json and package-lock.json or npm-shrinkwrap.json are in sync. Please update your lock file with `npm install` before continuing.
+63 error
+63 error Missing: react@18.3.1 from lock file
+63 error Missing: react-dom@18.3.1 from lock file
+63 error Missing: @aws-cdk/cli-plugin-contract@2.182.2 from lock file
+63 error Missing: scheduler@0.23.2 from lock file
+63 error Missing: @opentelemetry/core@2.0.0 from lock file
+63 error Missing: @opentelemetry/core@2.0.0 from lock file
+63 error Missing: uuid@9.0.1 from lock file
+63 error Missing: @opentelemetry/core@2.0.0 from lock file
+63 error Missing: @opentelemetry/core@2.0.0 from lock file
+63 error Missing: uuid@9.0.1 from lock file
+63 error
+63 error Clean install a project
+63 error
+63 error Usage:
+63 error npm ci
+63 error
+63 error Options:
+63 error [--install-strategy <hoisted|nested|shallow|linked>] [--legacy-bundling]
+63 error [--global-style] [--omit <dev|optional|peer> [--omit <dev|optional|peer> ...]]
+63 error [--include <prod|dev|optional|peer> [--include <prod|dev|optional|peer> ...]]
+63 error [--strict-peer-deps] [--foreground-scripts] [--ignore-scripts] [--no-audit]
+63 error [--no-bin-links] [--no-fund] [--dry-run]
+63 error [-w|--workspace <workspace-name> [-w|--workspace <workspace-name> ...]]
+63 error [-ws|--workspaces] [--include-workspace-root] [--install-links]
+63 error
+63 error aliases: clean-install, ic, install-clean, isntall-clean
+63 error
+63 error Run "npm help ci" for more info
+64 verbose cwd C:\rent-ledger-aws
+65 verbose os Windows_NT 10.0.26200
+66 verbose node v24.18.0
+67 verbose npm  v10.9.0
+68 notice
+68 notice New [31mmajor[39m version of npm available! [31m10.9.0[39m -> [34m11.18.0[39m
+68 notice Changelog: [34mhttps://github.com/npm/cli/releases/tag/v11.18.0[39m
+68 notice To update run: [4mnpm install -g npm@11.18.0[24m
+68 notice  { force: true, Symbol(proc-log.meta): true }
+69 verbose exit 1
+70 verbose code 1
+71 error A complete log of this run can be found in: C:\rent-ledger-aws\.npm\_logs\2026-07-08T11_02_39_072Z-debug-0.log
