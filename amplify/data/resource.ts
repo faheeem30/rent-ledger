@@ -9,19 +9,23 @@ import { type ClientSchema, a, defineData } from '@aws-amplify/backend';
 const schema = a.schema({
   Property: a.model({
     name: a.string().required(),
+    refNo: a.string(),
     address: a.string(),
     lat: a.string(),
     lng: a.string(),
     rent: a.float(),
     advanceAmount: a.float(),
+    maintenanceFee: a.float(),
+    maintenanceFeePaidBy: a.string(),
     occupancy: a.string(),          // "occupied" | "vacant"
     occupiedSince: a.string(),      // lease start date
     agreementDone: a.string(),      // "yes" | "no"
     rentDueDay: a.integer(),
     notes: a.string(),
     ownershipType: a.string(),      // "single" | "multiple"
-    owners: a.json(),               // [{id, name, phone}]
-    tenants: a.json(),              // [{id, name, phone, email, mailAlertEnabled}]
+    owners: a.json(),               // [{id, name, phone, sinceDate}]
+    tenants: a.json(),              // [{id, name, phone, email, mailAlertEnabled, moveInDate}]
+    tenantHistory: a.json(),        // [{id, name, phone, moveInDate, moveOutDate}]
   }).authorization(allow => [allow.owner()]),
 
   IncomeEntry: a.model({
