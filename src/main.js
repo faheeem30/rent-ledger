@@ -947,7 +947,7 @@ function renderTenants(main){
     }).join('')}
     </tbody></table>
     </div>
-    <div class="hint" style="margin-top:8px;">"✉ Email" opens a reminder in your own mail app. Fully automatic scheduled emails (sent without clicking) need Amazon SES + a scheduled job — ask if you want that added.</div>`}
+    }
   `;
 }
 
